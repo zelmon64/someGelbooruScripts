@@ -38,6 +38,7 @@ h6 {
 
 img {
   border: none;
+  max-width: 90%;
   vertical-align: middle;
 }
 
@@ -584,7 +585,7 @@ div#post-view div.note-box {
   overflow: auto;
   opacity:0.5;
 
-  /* for IE */ 
+  /* for IE */
   filter:alpha(opacity=50);
   /* for Mozilla */
   -moz-opacity:0.5;
@@ -957,13 +958,13 @@ a.code {
 
 
 .adHeadline {
-font: bold 12px Arial; 
-text-decoration: underline; 
+font: bold 12px Arial;
+text-decoration: underline;
 color: #0000FF;
 }
 
 .adText {
-font: normal 12px Arial; 
-text-decoration: none; 
+font: normal 12px Arial;
+text-decoration: none;
 color: #000000;
 }

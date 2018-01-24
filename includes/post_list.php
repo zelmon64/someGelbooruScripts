@@ -59,6 +59,8 @@ function copyMe(node) {
 	else
 		$page = 0;
 	$search = new search();
+	$no_cache = null;
+	$tag_count = null;
 	//No tags  have been searched for so let's check the last_update value to update our main page post count for parent posts. Updated once a day.
 	if(!isset($_GET['tags']) || isset($_GET['tags']) && $_GET['tags'] == "all" || isset($_GET['tags']) && $_GET['tags'] == "")
 	{
@@ -66,7 +68,7 @@ function copyMe(node) {
 		$result = $db->query($query);
 		$row = $result->fetch_assoc();
 		$numrows = $row['pcount'];
-		$date = date("Ymd");		
+		$date = date("Ymd");
 		if($row['last_update'] < $date)
 		{
 			$query = "SELECT COUNT(id) FROM posts WHERE parent = '0'";
@@ -74,13 +76,13 @@ function copyMe(node) {
 			$row = $result->fetch_assoc();
 			$numrows = $row['COUNT(id)'];
 			$query = "UPDATE $post_count_table SET pcount='".$row['COUNT(id)']."', last_update='$date' WHERE access_key='posts'";
-			$db->query($query);			
+			$db->query($query);
 		}
 	}
 	else
 	{
 		//Searched some tag, deal with page caching of html files.
-		$tags = $db->real_escape_string(str_replace("%",'',mb_trim(htmlentities($_GET['tags'], ENT_QUOTES, 'UTF-8'))));		
+		$tags = $db->real_escape_string(str_replace("%",'',mb_trim(htmlentities($_GET['tags'], ENT_QUOTES, 'UTF-8'))));
 		$tags = explode(" ",$tags);
 		$tag_count = count($tags);
 		$new_tag_cache = urldecode($tags[0]);
@@ -104,7 +106,7 @@ function copyMe(node) {
 			else
 			{
 				if(!is_dir("$main_cache_dir".""."search_cache/".$new_tag_cache."/"))
-					@mkdir("$main_cache_dir".""."search_cache/".$new_tag_cache."/");				
+					@mkdir("$main_cache_dir".""."search_cache/".$new_tag_cache."/");
 				$no_cache = true;
 			}
 		}
@@ -117,7 +119,7 @@ function copyMe(node) {
 				$page = ($_GET['pid']/$limit)+1;
 			else
 				$page = 0;
-				
+
 			$cache = new cache();
 			$no_cache = true;
 			if(is_dir("$main_cache_dir".""."search_cache/".$tags."/") && file_exists("$main_cache_dir".""."search_cache/".$tags."/".$page.".html"))
@@ -125,7 +127,7 @@ function copyMe(node) {
 				$data = $cache->load("search_cache/".$tags."/".$page.".html");
 				echo $data;
 				$numrows = 1;
-				$no_cache = false;			
+				$no_cache = false;
 			}
 		}
 	}
@@ -143,13 +145,13 @@ function copyMe(node) {
 		else
 		{
 			if($no_cache === true || $tag_count > 1 || strpos(strtolower($new_tag_cache),"user:") !== false || strpos(strtolower($new_tag_cache),"rating:") !== false || substr($new_tag_cache,0,1) == "-" || strpos(strtolower($new_tag_cache),"*") !== false || strpos(strtolower($new_tag_cache),"parent:") !== false)
-				$query = $query." LIMIT $page, $limit";			
+				$query = $query." LIMIT $page, $limit";
 		}
 		if(!isset($_GET['tags']) || $no_cache === true || $tag_count > 1 || strtolower($_GET['tags']) == "all" || strpos(strtolower($new_tag_cache),"user:") !== false || strpos(strtolower($new_tag_cache),"rating:") !== false || substr($new_tag_cache,0,1) == "-" || strpos(strtolower($new_tag_cache),"*") !== false || strpos(strtolower($new_tag_cache),"parent:") !== false)
 		{
 			if($no_cache === true)
 				ob_start();
-						
+
 			$gtags = array();
 			$images = '';
 			$tcount = 0;
@@ -159,7 +161,7 @@ function copyMe(node) {
 			{
 				$tags = mb_trim($row['tags']);
 				if($tcount <= 40)
-				{	
+				{
 					$ttags = explode(" ",$tags);
 					foreach($ttags as $current)
 					{
@@ -177,11 +179,11 @@ function copyMe(node) {
 				//]]>
 				</script>';
 				if($user->gotpermission('admin_panel'))
-					$images .= '<br/><span class="postID" onClick="copyMe(this);">'.$row['id'].'</span>'; 
+					$images .= '<br/><span class="postID" onClick="copyMe(this);">'.$row['id'].'</span>';
 				$images .= "</span>";
 				++$tcount;
 			}
-			$result->free_result();	
+			$result->free_result();
 			if(isset($_GET['tags']) && $_GET['tags'] != "" && $_GET['tags'] != "all")
 				$ttags = $db->real_escape_string(str_replace("'","&#039;",$_GET['tags']));
 			else
@@ -199,7 +201,7 @@ function copyMe(node) {
 				$row = $result->fetch_assoc();
 				$t_decode = urlencode(html_entity_decode($ttags,ENT_NOQUOTES,"UTF-8"));
 				$c_decode = urlencode(html_entity_decode($current,ENT_NOQUOTES,"UTF-8"));
-				echo '<li><a href="index.php?page=post&amp;s=list&amp;tags='.$t_decode."+".$c_decode.'">+</a><a href="index.php?page=post&amp;s=list&amp;tags='.$t_decode."+-".$c_decode.'">-</a> <span style="color: #a0a0a0;">? <a href="index.php?page=post&amp;s=list&amp;tags='.$c_decode.'" class="'.$row['category'].'">'.str_replace('_',' ',$current).'</a> '.$row['index_count'].'</span></li>';
+				echo '<li><a href="index.php?page=post&amp;s=list&amp;tags='.$t_decode."+".$c_decode.'">+</a><a href="index.php?page=post&amp;s=list&amp;tags='.$t_decode."+-".$c_decode.'">-</a> <span style="color: #a0a0a0;"><a href="'.$site_url.'wiki/index.php?page=Tags-'.ucfirst($row['category']).'-'.ucfirst($c_decode).'">?</a> <a href="index.php?page=post&amp;s=list&amp;tags='.$c_decode.'" class="'.$row['category'].'">'.ucfirst(str_replace("_"," ",$current)).'</a> '.$row['index_count'].'</span></li>';
 			}
 			//Print out image results and filter javascript
 			echo '<li><br /><br /></li></ul></div></div><div class="content"><div>';
@@ -214,7 +216,7 @@ function copyMe(node) {
 			//Pagination function. This should work for the whole site... Maybe.
 			$misc = new misc();
 			print $misc->pagination($_GET['page'],$_GET['s'],$id,$limit,$page_limit,$numrows,$_GET['pid'],$_GET['tags']);
-			
+
 		}
 		//Cache doesn't exist for search, make one.
 		if($no_cache === true)

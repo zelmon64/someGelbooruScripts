@@ -92,18 +92,18 @@
 						if(ctype_alpha($spec_tag[$i]) && ($spec_tag[$i-1] == '.' || $spec_tag[$i-1] == '('))
 							$spec_tag[$i] = strtoupper($spec_tag[$i]);
 					}
-				echo '<li><span style="color: #a0a0a0;">? '.
+				echo '<li><span style="color: #a0a0a0;"><a href="'.$site_url.'wiki/index.php?page=Tags-'.ucfirst($cat).'-'.ucfirst($spec_tag).'">?</a> '.
 				'<a href="index.php?page=post&amp;s=list&amp;tags='.$spec_tag.'" class="'.$cat.'">'.
 					ucwords(str_replace('_',' ', $spec_tag)).
 				"</a> ".$count['index_count']."</span></li>";
 			}
 			echo "<br/>";
 		}
-		echo "<h5>Tags</h5>";
+		echo "<h5>General Tags</h5>";
 		foreach($ttags as $current)
 		{
 			$count = $post->index_count($current);
-			echo '<li><span style="color: #a0a0a0;">? <a href="index.php?page=post&amp;s=list&amp;tags='.$current.'" class="'.$categories[$current].'">'.str_replace('_',' ',$current)."</a> ".$count['index_count']."</span></li>";
+			echo '<li><span style="color: #a0a0a0;"><a href="'.$site_url.'wiki/index.php?page=Tags-general-'.$current.'">?</a> <a href="index.php?page=post&amp;s=list&amp;tags='.$current.'" class="general">'.ucwords(str_replace('_',' ',$current))."</a> ".$count['index_count']."</span></li>";
 		}
 		echo '<li><br /><br /><br /><br /><br /><br /><br /><br /></li></ul></div></div>';
 		if($post_data['title'] != "")
