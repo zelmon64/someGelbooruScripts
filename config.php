@@ -1,11 +1,11 @@
 <?php
-	$mysql_host = "127.0.0.1";
+	$mysql_host = "piratebox.lan";
 	$mysql_user = "gelbooru";
-	$mysql_pass = "gelbooru";
-	$mysql_db = "gelbooru1";
-	
+	$mysql_pass = "mysql";
+	$mysql_db = "gelboorudb";
+
 	//site base url, trailing slash.
-	$site_url = "https://gelbooru.com/";
+	$site_url = "http://piratebox.lan/gelbooru/";
 	//URL to the thumbnails directory
 	$thumbnail_url = $site_url . "thumbnails/";
 	//Site Name. Displays in header.
@@ -16,7 +16,7 @@
 	$dimension = 150;
 	//thumbnails folder..
 	$thumbnail_folder = "thumbnails";
-	
+
 	//user database table...
 	$user_table = "users";
 	//post table..
@@ -65,7 +65,7 @@
 	$banned_ip_table = "banned_ip";
 	//domains for images. ex: http://img1.domain.com/, http://img2.domain.com/folder/folder/
 	$domains = array(''.$site_url.'');
-	
+
 	//max image width for upload (0 for no limit)
 	$max_upload_width = 0;
 	//max image height for upload (0 for no limit)
@@ -74,14 +74,14 @@
 	$min_upload_width = 150;
 	//min image height for upload (0 for no limit)
 	$min_upload_height = 150;
-	
+
 	//registration allowed?
 	$registration_allowed = true;
 
 	//mail settings
 	$site_email = "noemail@example.com";
 	$email_recovery_subject = "password reset for ".$site_url."";
-	
+
 	//enable or disable anonymous reports set false to disable
 	$anon_report = false;
 	//enable or disable anonymous edits set false to disable
@@ -95,5 +95,5 @@
 	//Edit limit in minutes. If time is over this, edit will not happen.
 	$edit_limit = 20;
 	//cache dir, all cache will be stored in subdirs to this. Put it on RAM or FAST Raid drives.
-	//$main_cache_dir = "NUL:\\";
+	$main_cache_dir = "/tmp/gelbooru_cache/";
 ?>

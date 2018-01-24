@@ -1,7 +1,7 @@
 <?php
 	require "inv.header.php";
 	//Give credit to which user?
-	$user = "Anonymous";	
+	$user = "zelmon64";
 	$path = "import/";
 	$image = new image();
 	$folders = scandir($path);
@@ -13,7 +13,7 @@
 	$rejected_files = 0;
 	$skipped_files = 0;
 	$i = 0;
-	
+
 	function getTagString($tagString) {
 		$tagString = str_replace(" ", "_", $tagString);
 		$tagString = str_replace("/", " ", $tagString);
@@ -22,7 +22,7 @@
 		}
 		return $tagString;
 	}
-	
+
 	//Recursively scan directory for folders. Exclude . and ..
 	function rScanDir($scanMe) {
 		global $path, $tmpPath, $cur_folder, $tags2;
@@ -65,7 +65,7 @@
 				if($iinfo === false)
 					$error = $image->geterror();
 				else
-					$uploaded_image = true;	
+					$uploaded_image = true;
 				//Ok, download of image was successful! (yay?)
 				if($uploaded_image == true)
 				{
@@ -115,7 +115,7 @@
 							$ttags = $tclass->filter_tags($tags,$current, $ttags);
 							$tclass->addindextag($current);
 							$cache = new cache();
-							
+
 							if(is_dir("$main_cache_dir".""."search_cache/".$current."/"))
 							{
 								$cache->destroy_page_cache("search_cache/".$current."/");
@@ -123,7 +123,7 @@
 							else
 							{
 								if(is_dir("$main_cache_dir".""."search_cache/".$misc->windows_filename_fix($current)."/"))
-									$cache->destroy_page_cache("search_cache/".$misc->windows_filename_fix($current)."/");		
+									$cache->destroy_page_cache("search_cache/".$misc->windows_filename_fix($current)."/");
 							}
 						}
 					}
@@ -131,7 +131,7 @@
 					$tags = implode(" ",$ttags);
 					$tags = mb_trim($tags);
 					$tags = " $tags ";
-					$rating = "Questionable";
+					$rating = "Safe";
 					$ip = "127.0.0.1";
 					$isinfo = getimagesize("./images/".$iinfo[0]."/".$iinfo[1]);
 					$query = "INSERT INTO $post_table(creation_date, hash, image, title, owner, height, width, ext, rating, tags, directory, source, active_date, ip) VALUES(NOW(), '".md5_file("./images/".$iinfo[0]."/".$iinfo[1])."', '".$iinfo[1]."', '$title', '$user', '".$isinfo[1]."', '".$isinfo[0]."', '$ext', '$rating', '$tags', '".$iinfo[0]."', '$source', '".date("Ymd")."', '$ip')";
@@ -156,7 +156,7 @@
 						$query = "SELECT id FROM $post_table WHERE hash='".md5_file('./images/'.$iinfo[0]."/".$iinfo[1])."' AND image='".$iinfo[1]."' AND directory='".$iinfo[0]."'  LIMIT 1";
 						$result = $db->query($query);
 						$row = $result->fetch_assoc();
-						$cache = new cache();				
+						$cache = new cache();
 						if($parent != '' && is_numeric($parent))
 						{
 							$parent_check = "SELECT COUNT(*) FROM $post_table WHERE id='$parent'";
@@ -168,9 +168,9 @@
 								$db->query($temp);
 								$temp = "UPDATE $post_table SET parent='$parent' WHERE id='".$row['id']."'";
 								$db->query($temp);
-								$cache->destroy("cache/".$parent."/post.cache");	
+								$cache->destroy("cache/".$parent."/post.cache");
 							}
-						}				
+						}
 						if(is_dir("$main_cache_dir".""."cache/".$row['id']))
 							$cache->destroy_page_cache("cache/".$row['id']);
 						$query = "SELECT id FROM $post_table WHERE id < ".$row['id']." ORDER BY id DESC LIMIT 1";

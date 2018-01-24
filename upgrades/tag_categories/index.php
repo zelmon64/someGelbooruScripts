@@ -3,7 +3,7 @@
 	$user = new user();
 	if($user->gotpermission('is_admin'))
 	{
-		if(!isset($tag_cateory_table))
+		if(!isset($tag_category_table))
 			$tag_category_table = 'tag_categories';
 
 		$query = "CREATE TABLE if not exists `$tag_category_table` (
