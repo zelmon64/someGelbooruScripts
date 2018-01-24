@@ -76,7 +76,7 @@
 		//foreach($special_tags as $cur_tag)
 		foreach($categories as $cat => $tag_arr)
 		{
-			echo "<h5>".ucfirst(str_replace('_',' ',$cat));
+			echo "<h5 class=".$cat.">".ucfirst(str_replace('_',' ',$cat));
 			if(count($tag_arr) > 1)
 			{
 				if(substr($cat, -1) == 's') echo "'";
@@ -99,7 +99,7 @@
 			}
 			echo "<br/>";
 		}
-		echo "<h5>General Tags</h5>";
+		echo "<h5 style='color:blue;'>General Tags</h5>";
 		foreach($ttags as $current)
 		{
 			$count = $post->index_count($current);

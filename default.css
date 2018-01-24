@@ -968,3 +968,26 @@ font: normal 12px Arial;
 text-decoration: none;
 color: #000000;
 }
+
+h5.animal {
+  color: red;
+}
+
+a.animal {
+  color: red;
+}
+
+h5.testing {
+        color: purple;
+}
+
+a.testing {
+        color: purple;
+}
+
+h5.gender {
+        color: black;
+}
+a.gender {
+        color: black;
+}
