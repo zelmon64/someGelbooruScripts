@@ -6,6 +6,8 @@
 	if(isset($lozerisdumb))
 		print " ".$lozerisdumb;
 	echo '</title>
+		<script type="text/javascript" src="'.$site_url.'extras/bytebox.js"></script>
+		<link rel="stylesheet" href="'.$site_url.'extras/bytebox.css" type="text/css" media="screen" />
 		<link rel="stylesheet" type="text/css" media="screen" href="'.$site_url.'default.css?2" title="default" />
 		<link rel="search" type="application/opensearchdescription+xml" title="'.$site_url3.'" href="'.$site_url.'/Image Collection.xml" />
 		<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />

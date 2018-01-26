@@ -36,7 +36,14 @@ h6 {
   font-size: 1em;
 }
 
-img {
+img.fit {
+  border: none;
+  max-height: 600px;
+  max-width: 90%;
+  vertical-align: middle;
+}
+
+img.thumb {
   border: none;
   max-width: 90%;
   vertical-align: middle;

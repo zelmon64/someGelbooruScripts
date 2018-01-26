@@ -172,7 +172,7 @@ function copyMe(node) {
 						}
 					}
 				}
-				$images .= '<span class="thumb"><a id="p'.$row['id'].'" href="index.php?page=post&amp;s=view&amp;id='.$row['id'].'"><img src="'.$thumbnail_url.'/'.$row['directory'].'/thumbnail_'.$row['image'].'" alt="post" border="0" title="'.$row['tags'].' score:'.$row['score'].' rating:'. $row['rating'].'"/></a>
+				$images .= '<span class="thumb"><a id="p'.$row['id'].'" href="index.php?page=post&amp;s=view&amp;id='.$row['id'].'"><img class="thumb" src="'.$thumbnail_url.'/'.$row['directory'].'/thumbnail_'.$row['image'].'" alt="post" border="0" title="'.$row['tags'].' score:'.$row['score'].' rating:'. $row['rating'].'"/></a>
 				<script type="text/javascript">
 				//<![CDATA[
 				posts['.$row['id'].'] = {\'tags\':\''.strtolower(str_replace('\\',"&#92;",str_replace("'","&#039;",$tags))).'\'.split(/ /g), \'rating\':\''.$row['rating'].'\', \'score\':'.$row['score'].', \'user\':\''.str_replace('\\',"&#92;",str_replace(' ','%20',str_replace("'","&#039;",$row['owner']))).'\'}
@@ -181,7 +181,7 @@ function copyMe(node) {
 				if($user->gotpermission('admin_panel'))
 					$images .= '<br/><span class="postID" onClick="copyMe(this);">'.$row['id'].'</span>';
 				$images .= "</span>";
-				++$tcount;
+				//++$tcount;
 			}
 			$result->free_result();
 			if(isset($_GET['tags']) && $_GET['tags'] != "" && $_GET['tags'] != "all")

@@ -23,6 +23,9 @@
 
       <dt>&ndash;</dt>
       <dd>This adds the negated tag to the current search.</dd>
+
+      <dt>?</dt>
+      <dd>This links to a wiki page with a description of the tag.</dd>
            
       <dt>950</dt>
       <dd>The number next to the tag represents how many posts there are. This isn't always the total number of posts for that tag. It may be slightly out of date as cache isn't always refreshed.</dd>

@@ -71,6 +71,7 @@
 		</form><small>(Supports wildcard *)</small>
 		</div>
 		<div id="tag_list">
+		<a rel ="bytebox" href="f6ca1c7d5d00a2a3fb4ea2f7edfa0f96a6d09c11717f39facabad2d724f16fbb/images/'.$post_data['directory'].'/'.$post_data['image'].'">Original Image</a>
 		<!--<h5>Tags</h5>-->
 		<ul>';
 		//foreach($special_tags as $cur_tag)
@@ -126,7 +127,7 @@
 			';
 		}
 		
-		echo '<img alt="img" src="f6ca1c7d5d00a2a3fb4ea2f7edfa0f96a6d09c11717f39facabad2d724f16fbb/images/'.$post_data['directory'].'/'.$post_data['image'].'" id="image" onclick="Note.toggle();" style="margin-right: 70px;"/><br />Posted on '.$post_data['creation_date'].' by  <a href="index.php?page=account_profile&amp;uname='.$post_data['owner'].'">'.$post_data['owner'].'</a><br /><p id="note-count"></p>
+		echo '<img alt="img" class="fit" src="f6ca1c7d5d00a2a3fb4ea2f7edfa0f96a6d09c11717f39facabad2d724f16fbb/images/'.$post_data['directory'].'/'.$post_data['image'].'" id="image" onclick="Note.toggle();" style="margin-right: 70px;"/><br />Posted on '.$post_data['creation_date'].' by  <a href="index.php?page=account_profile&amp;uname='.$post_data['owner'].'">'.$post_data['owner'].'</a><br /><p id="note-count"></p>
 		<script type="text/javascript">
 		//<![CDATA[
 		Note.post_id = '.$id.';';
@@ -234,6 +235,9 @@
 		//<![CDATA[
 		var posts = {}; posts['.$id.'] = {}; posts['.$id.'].comments = {}; posts['.$id.'].ignored = {}; var cthreshold = parseInt(readCookie(\'comment_threshold\')) || 0; var users = readCookie(\'user_blacklist\').split(/[, ]|%20+/g);
 		//]]>
+		</script>
+		<script type="text/javascript">
+			bytebox.init();
 		</script>';
 
 		$data = '';
