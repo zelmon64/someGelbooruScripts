@@ -22,6 +22,15 @@
 			return $result;
 		}
 		
+		function has_notes($id)
+		{
+			$result = $this->get_notes($id);
+			if($result->num_rows == "0")
+				return false;
+			else
+				return true;
+		}
+
 		function prev_next($id)
 		{
 			global $db, $post_table;

@@ -1,4 +1,7 @@
 <?php
+	// At start of script
+	$time_start = microtime(true); 
+
 	require "inv.header.php";
 	if(isset($_GET['page']) && $_GET['page'] != "")
 	{
@@ -47,4 +50,5 @@
 		header("Pragma: cache");
 		require "includes/index.php";
 	}
+	echo "<center><small>Memory Usage: " . round((memory_get_usage()/1048576), 2) . " MB, Total execution time: " . (microtime(true) - $time_start) * 1000 . "ms</small></center>";
 ?>

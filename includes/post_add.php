@@ -1,18 +1,22 @@
 <?php
 	//die("Maintenance mode. please try again in 1 hour.");
-	error_reporting(0);
-	ignore_user_abort(1);
+	//error_reporting(0);
+	//ignore_user_abort(1);
 	$misc = new misc();
 	$userc = new user();
-	$ip = $db->real_escape_string($_SERVER['REMOTE_ADDR']);	
+	$ip = $db->real_escape_string($_SERVER['REMOTE_ADDR']);
+	$error = '';
+	$no_upload = false;
 	if($userc->banned_ip($ip))
 	{
 		print "Action failed: ".$row['reason'];
 		exit;
-	}	
+	}
 	if(!$userc->check_log())
 	{
-		if(!$anon_can_upload)
+        $query = "SELECT ip FROM $post_table WHERE ip='".$ip."' LIMIT 1";
+        $result = $db->query($query);
+		if(!$anon_can_upload && $result->num_rows == 0)
 			$no_upload = true;
 	}
 	else
@@ -25,12 +29,11 @@
 		print "You do not have permission to upload.";
 		exit;
 	}
-	if(isset($_POST['submit']))
+	if($_SERVER['REQUEST_METHOD'] == 'POST')
 	{
 		$image = new image();
 		$uploaded_image = false;
 		$parent = '';
-		$error = '';
 		if(empty($_FILES['upload']) && isset($_POST['source']) && $_POST['source'] != "" && substr($_POST['source'],0,4) == "http" || $_FILES['upload']['error'] != 0 && isset($_POST['source']) && $_POST['source'] != "" && substr($_POST['source'],0,4) == "http")
 		{
 			$iinfo = $image->getremoteimage($_POST['source']);
@@ -48,7 +51,9 @@
 				$uploaded_image = true;
 		}
 		else
+		{
 			print "No image given for upload.";
+		}
 		if($uploaded_image == true)
 		{
 			$iinfo = explode(":",$iinfo);
@@ -59,7 +64,7 @@
 			$title = $db->real_escape_string(htmlentities($_POST['title'],ENT_QUOTES,'UTF-8'));
 			$tags = strtolower($db->real_escape_string(str_replace('%','',mb_strtolower(mb_trim(htmlentities($_POST['tags'],ENT_QUOTES,'UTF-8'))))));
 			$ttags = explode(" ",$tags);
-			$tag_count = count($ttags);		
+			$tag_count = count($ttags);
 			if($tag_count == 0)
 				$ttags[] = "tagme";
 			if($tag_count < 5 && strpos(implode(" ",$ttags),"tagme") === false)
@@ -93,7 +98,7 @@
 					$ttags = $tclass->filter_tags($tags,$current, $ttags);
 					$tclass->addindextag($current);
 					$cache = new cache();
-					
+
 					if(is_dir("$main_cache_dir".""."search_cache/".$current."/"))
 					{
 						$cache->destroy_page_cache("search_cache/".$current."/");
@@ -101,13 +106,13 @@
 					else
 					{
 						if(is_dir("$main_cache_dir".""."search_cache/".$misc->windows_filename_fix($current)."/"))
-							$cache->destroy_page_cache("search_cache/".$misc->windows_filename_fix($current)."/");		
+							$cache->destroy_page_cache("search_cache/".$misc->windows_filename_fix($current)."/");
 					}
 				}
 			}
 			asort($ttags);
 			$tags = implode(" ",$ttags);
-			$tags = mb_trim(str_replace("  ","",$tags));			
+			$tags = mb_trim(str_replace("  ","",$tags));
 			if(substr($tags,0,1) != " ")
 				$tags = " $tags";
 			if(substr($tags,-1,1) != " ")
@@ -125,12 +130,13 @@
 				$user = "Anonymous";
 
 			$ip = $db->real_escape_string($_SERVER['REMOTE_ADDR']);
-			$isinfo = getimagesize("./images/".$iinfo[0]."/".$iinfo[1]);
+			$thumb = $image->thumbnail($iinfo[0]."/".$iinfo[1]);
+			$isinfo = $image->getInfo();
 			$query = "INSERT INTO $post_table(creation_date, hash, image, title, owner, height, width, ext, rating, tags, directory, source, active_date, ip) VALUES(NOW(), '".md5_file("./images/".$iinfo[0]."/".$iinfo[1])."', '".$iinfo[1]."', '$title', '$user', '".$isinfo[1]."', '".$isinfo[0]."', '$ext', '$rating', '$tags', '".$iinfo[0]."', '$source', '".date("Ymd")."', '$ip')";
 			if(!is_dir("./thumbnails/".$iinfo[0]."/"))
 				$image->makethumbnailfolder($iinfo[0]);
-			if(!$image->thumbnail($iinfo[0]."/".$iinfo[1]))
-				print "Thumbnail generation failed! A serious error occured and the image could not be resized.<br /><br />";
+			if(!$thumb)
+				print "Thumbnail generation failed! A serious error occurred and the image could not be resized.<br /><br />";
 			if(!$db->query($query))
 			{
 				print "failed to upload image."; print $query;
@@ -148,8 +154,8 @@
 				$tags = $db->real_escape_string($row['tags']);
 				$date = date("Y-m-d H:i:s");
 				$query = "INSERT INTO $tag_history_table(id,tags,user_id,updated_at,ip) VALUES('".$row['id']."','$tags','$checked_user_id','$date','$ip')";
-				$db->query($query) or die($db->error);				
-				$cache = new cache();				
+				$db->query($query) or die($db->error);
+				$cache = new cache();
 				if($parent != '' && is_numeric($parent))
 				{
 					$parent_check = "SELECT COUNT(*) FROM $post_table WHERE id='$parent'";
@@ -161,9 +167,9 @@
 						$db->query($temp);
 						$temp = "UPDATE $post_table SET parent='$parent' WHERE id='".$row['id']."'";
 						$db->query($temp);
-						$cache->destroy("cache/".$parent."/post.cache");	
+						$cache->destroy("cache/".$parent."/post.cache");
 					}
-				}				
+				}
 				if(is_dir("$main_cache_dir".""."cache/".$row['id']))
 					$cache->destroy_page_cache("cache/".$row['id']);
 				$query = "SELECT id FROM $post_table WHERE id < ".$row['id']." ORDER BY id DESC LIMIT 1";
@@ -214,10 +220,12 @@
 	<tr><td>
 	<input type="submit" name="submit" value="Upload" />
 	</td></tr>
+	<tr><td>
+	<br>
 	</table>
 	</form>
+	<script language="javascript" type="text/javascript" src="./script/multiupload.js"></script>
 	<script type="text/javascript">
-	//<![CDATA[
 	function toggleTags(tag, id, lid)
 	{
 		temp = new Array(1);
@@ -234,5 +242,4 @@
 			$(lid).innerHTML="<b>"+tag+"</b> ";
 		}
 	}
-	//]]>
 	</script></div></body></html>

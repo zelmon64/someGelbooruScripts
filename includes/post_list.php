@@ -1,6 +1,7 @@
 <?php
 	//number of images/page
 	$limit = 20;
+	$tags_limit = 20;
 	//number of pages to display. number - 1. ex: for 5 value should be 4
 	$page_limit = 10;
 	require "includes/header.php";
@@ -156,16 +157,16 @@ function copyMe(node) {
 			$images = '';
 			$tcount = 0;
 			$result = $db->query($query) or die($db->error);
-			//Limit main tag listing to 40 tags. Keep the loop down to the minimum really.
+			//Limit main tag listing to $tags_limit tags. Keep the loop down to the minimum really.
 			while($row = $result->fetch_assoc())
 			{
 				$tags = mb_trim($row['tags']);
-				if($tcount <= 40)
+				if($tcount <= $tags_limit)
 				{
 					$ttags = explode(" ",$tags);
 					foreach($ttags as $current)
 					{
-						if($current != "" && $current != " ")
+						if($current != "" && $current != " " && !array_key_exists($current, $gtags))
 						{
 							$gtags[$current] = $current;
 							++$tcount;
@@ -181,7 +182,6 @@ function copyMe(node) {
 				if($user->gotpermission('admin_panel'))
 					$images .= '<br/><span class="postID" onClick="copyMe(this);">'.$row['id'].'</span>';
 				$images .= "</span>";
-				//++$tcount;
 			}
 			$result->free_result();
 			if(isset($_GET['tags']) && $_GET['tags'] != "" && $_GET['tags'] != "all")
