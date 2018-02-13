@@ -143,7 +143,7 @@
 	while($row = $result->fetch_assoc())
 	{
 		echo "<tr>
-			<td>".$row['tag']."</td>
+			<td><a href=\"index.php?page=post&amp;s=list&amp;tags=".$row['tag']."\">".$row['tag']."</a></td>
 			<td>".$row['index_count']."</td>
 			<td>".$row['category']."</td>
 		</tr>";
