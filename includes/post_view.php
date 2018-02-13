@@ -111,6 +111,14 @@
 		else
 			echo '<h2>Untitled</h2><br/>';
 		echo '<a rel ="bytebox" href="f6ca1c7d5d00a2a3fb4ea2f7edfa0f96a6d09c11717f39facabad2d724f16fbb/images/'.$post_data['directory'].'/'.$post_data['image'].'">Original Image</a> | ';
+		if($prev_next['0'] != "")
+			echo '<a href="index.php?page=post&amp;s=view&amp;id='.$prev_next['0'].'">Previous</a> | ';
+		else
+			echo '<font color="grey">Previous</font> | ';
+		if($prev_next['1'] != "")
+			echo '<a href="index.php?page=post&amp;s=view&amp;id='.$prev_next['1'].'">Next</a> | ';
+		else
+			echo '<font color="grey">Next</font> | ';
 		echo '<b>Score</b> <a href="#" onclick="Javascript:post_vote(\''.$id.'\', \'up\')">+</a> <a href="#" onclick="Javascript:post_vote(\''.$id.'\', \'down\')">-</a> <a id="psc">'.$post_data['score'].'</a> | ';
 		if($post_data['spam'] == false)
 			echo '<a id="rp'.$id.'"></a><a href="#" id="rpl'.$id.'" onclick="Element.toggle(\'report_form\')">Report post.</a><br /><form id="report_form" method="post" action="./public/report.php?type=post&amp;rid='.$id.'" style="display: none;">Reason for report:<br /><input type="text" name="reason" value=""/><input type="submit" name="submit" value="" style="display: none;"/></form>';
