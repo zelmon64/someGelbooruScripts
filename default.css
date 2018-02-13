@@ -976,6 +976,10 @@ text-decoration: none;
 color: #000000;
 }
 
+span.postID {
+  visibility: hidden;
+}
+
 h5.animal {
   color: red;
 }
