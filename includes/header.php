@@ -34,11 +34,13 @@
 				<ul class="flat-list" id="navbar">
 
 			<li><a href="'.$site_url.'index.php?page=account">My Account</a></li>
+			<li><a href="../../">Home</a></li>
 			<li><a href="'.$site_url.'index.php?page=post&amp;s=list&amp;tags=all">Posts</a></li>
 			<li><a href="'.$site_url.'index.php?page=comment&amp;s=list">Comments</a></li>
 			<li><a href="'.$site_url.'index.php?page=alias&amp;s=list">Alias</a></li>
 			<li><a href="'.$site_url.'index.php?page=tags&amp;s=list">Tags</a></li>
 			<li><a href="'.$site_url.'index.php?page=forum&amp;s=list">Forum</a></li>
+			<li><a href="'.$site_url.'wiki/">Wiki</a></li>
 			<li><a href="'.$site_url.'index.php?page=post&amp;s=random">Random</a></li>
 			<li><a href="'.$site_url.'help/index.php">Help</a></li>
 ';

@@ -3,7 +3,7 @@ foreach($_REQUEST as $k => $v)
 	unset($$k); // register_globals = off
 
 // SETTINGS - default settings, can be overridden in config.php
-$WIKI_TITLE = 'My new wiki'; // name of the site
+$WIKI_TITLE = 'Sussex Community Day Centre wiki'; // name of the site
 $PASSWORD = ''; // SHA1 hash
 
 $TEMPLATE = 'templates/dandelion.html'; // presentation template
@@ -36,6 +36,8 @@ $LANG_DIR = 'lang/';
 
 // default translation
 $T_HOME = 'Main page';
+$T_MAIN = 'Home';
+$T_FORUM = 'Catalogue';
 $T_SYNTAX = 'Syntax';
 $T_DONE = 'Save changes';
 $T_DISCARD_CHANGES = 'Discard changes';
@@ -471,6 +473,8 @@ $tpl_subs = array(
 	'SEARCH_INPUT' => '<input type="text" name="query" value="'.h($query).'"/>',
 	'SEARCH_SUBMIT' => "<input class=\"submit\" type=\"submit\" value=\"$T_SEARCH\"/>",
 	'HOME' => "<a href=\"$self?page=".u($START_PAGE)."\">$T_HOME</a>",
+	'MAIN' => "<a href=\"../../content/index.html\">$T_MAIN</a>",
+	'FORUM' => "<a href=\"../index.php\">$T_FORUM</a>",
 	'RECENT_CHANGES' => "<a href=\"$self?action=recent\">$T_RECENT_CHANGES</a>",
 	'ERROR' => $error,
 	'HISTORY' => $page ? "<a href=\"$self?page=".u($page)."&amp;action=history\">$T_HISTORY</a>" : "",

@@ -1,15 +1,15 @@
 <?php
-	$mysql_host = "piratebox.lan";
+	$mysql_host = "SCDC.lan";
 	$mysql_user = "gelbooru";
 	$mysql_pass = "mysql";
 	$mysql_db = "gelboorudb";
 
 	//site base url, trailing slash.
-	$site_url = "http://piratebox.lan/gelbooru/";
+	$site_url = "http://SCDC.lan/gelbooru/";
 	//URL to the thumbnails directory
 	$thumbnail_url = $site_url . "thumbnails/";
 	//Site Name. Displays in header.
-	$site_url3 = "Default Booru";
+	$site_url3 = "Crafting Catalogue";
 	//folder containing the images..
 	$image_folder = "images";
 	//thumbnails dimension... same as in danbooru version...
@@ -70,10 +70,10 @@
 	$max_upload_width = 0;
 	//max image height for upload (0 for no limit)
 	$max_upload_height = 0;
-	//min image width for upload (0 for no limit)
-	$min_upload_width = 150;
-	//min image height for upload (0 for no limit)
-	$min_upload_height = 150;
+	//min image width for upload (0 for no limit, was 150)
+	$min_upload_width = 10;
+	//min image height for upload (0 for no limit, was 150)
+	$min_upload_height = 10;
 
 	//registration allowed?
 	$registration_allowed = true;

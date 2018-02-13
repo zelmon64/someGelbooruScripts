@@ -12,8 +12,10 @@
 	';
 ?>
 	<div class="space" id="links">
+		<a href="../index.html" title="Return to the main page">Home</a>
 		<a href="index.php?page=post&amp;s=list" title="A paginated list of every post">Posts</a>
 		<a href="index.php?page=comment&amp;s=list">Comments</a>
+		<a href="wiki/" title="Go to the wiki">Wiki</a>
 		<a href="index.php?page=reg">Register</a>
 		<a href="index.php?page=favorites&amp;s=list">Favorites</a>
 	</div>
