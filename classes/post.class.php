@@ -177,7 +177,6 @@
 				if($g_tags != "")
 				{
 					if ($neg_search) {
-						$g_tags = preg_replace("/\-/", "", $g_tags);
 						$query = "SELECT SQL_NO_CACHE id FROM $post_table WHERE id > $id AND (NOT (MATCH(tags) AGAINST('$g_tags' IN BOOLEAN MODE)>0.9) $g_parent $g_owner $g_score $g_rating $blacklist $parent_patch) ORDER BY id ASC LIMIT 1";
 					} else {
 						$query = "SELECT SQL_NO_CACHE id FROM $post_table WHERE id > $id AND ((MATCH(tags) AGAINST('$g_tags' IN BOOLEAN MODE)>0.9) $g_parent $g_owner $g_score $g_rating $blacklist $parent_patch) ORDER BY id ASC LIMIT 1";
