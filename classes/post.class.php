@@ -33,8 +33,12 @@
 
 		function prev_next($id, $search = false)
 		{
+			if(isset($search) && $search !="" && $search)
+				$tagged = true;
+			else
+				$tagged = false;
 			global $db, $post_table;
-			if(isset($search) && $search !="" && $search){
+			if($tagged){
 				$search = $db->real_escape_string($search);
 				require_once('search.class.php');
 				$searchclassfnc = new search();
@@ -127,35 +131,70 @@
 					$neg_search = !strpos($g_tags,"+");
 					if ($neg_search) {
 						$g_tags = preg_replace("/\-/", "", $g_tags);
-						$query = "SELECT SQL_NO_CACHE id FROM $post_table WHERE id < $id AND NOT (MATCH(tags) AGAINST('$g_tags' IN BOOLEAN MODE)>0.9) $g_parent $g_owner $g_score $g_rating $blacklist $parent_patch ORDER BY id DESC LIMIT 1";
+						$query = "SELECT SQL_NO_CACHE id FROM $post_table WHERE id < $id AND (NOT (MATCH(tags) AGAINST('$g_tags' IN BOOLEAN MODE)>0.9) $g_parent $g_owner $g_score $g_rating $blacklist $parent_patch) ORDER BY id DESC LIMIT 1";
 					} else {
-						//$query = "SELECT SQL_NO_CACHE id FROM $post_table WHERE (id < $id AND MATCH(tags) AGAINST('$tags')) ORDER BY id DESC LIMIT 1";
-						$query = "SELECT SQL_NO_CACHE id FROM $post_table WHERE id < $id AND (MATCH(tags) AGAINST('$g_tags' IN BOOLEAN MODE)>0.9) $g_parent $g_owner $g_score $g_rating $blacklist $parent_patch ORDER BY id DESC LIMIT 1";
+						$query = "SELECT SQL_NO_CACHE id FROM $post_table WHERE id < $id AND ((MATCH(tags) AGAINST('$g_tags' IN BOOLEAN MODE)>0.9) $g_parent $g_owner $g_score $g_rating $blacklist $parent_patch) ORDER BY id DESC LIMIT 1";
 					}
+				}
+				else if($g_parent != "" || $g_owner != "" || $g_rating != "" || $g_score != "")
+				{
+					if($g_parent != "")
+					{
+						$g_parent = str_replace('AND',"",$g_parent);
+						$parent = substr($parent,4,strlen($parent));
+						$parent_patch = "OR $parent $g_owner $g_score $g_rating";
+					}
+					else if($g_owner != "")
+						$g_owner = str_replace('AND',"",$g_owner);
+					else if($g_rating != "")
+						$g_rating = substr($g_rating,4,strlen($g_rating));
+					else if($g_score != "")
+						$g_score = str_replace('AND',"",$g_score);
+					else if($blacklist != "")
+						$blacklist = str_replace('AND',"",$blacklist);
+					if($g_parent == "")
+						$parent_patch = " AND parent='0'";
+					$query = "SELECT SQL_NO_CACHE id FROM $post_table WHERE id < $id AND ($g_parent $g_owner $g_score $g_rating $blacklist $parent_patch) ORDER BY id DESC LIMIT 1";
+				}
+				else
+				{
+					$count = substr_count($search, '*', 0, strlen($search));
+					if(strlen($search)-$count > 0)
+					{
+						$res = str_replace("*","",$search);
+						$query = "SELECT * FROM $post_table WHERE id < $id AND tags LIKE '% $res %' ORDER BY id DESC LIMIT 1";
+					}
+					else
+						$query = "SELECT * FROM $post_table WHERE id < $id ORDER BY id DESC LIMIT 1";
 				}
 			}
 			else
 				$query = "SELECT SQL_NO_CACHE id FROM $post_table WHERE id < $id ORDER BY id DESC LIMIT 1";
-			//print $query;
 			$result = $db->query($query);
 			$row = $result->fetch_assoc();
 			$prev_next[] = $row['id'];
-			//if(isset($tags) && $tags !="" && $tags)
-			//	$query = "SELECT SQL_NO_CACHE id FROM $post_table WHERE (id > $id AND MATCH(tags) AGAINST('$tags')) ORDER BY id ASC LIMIT 1";
-			if(isset($search) && $search !="" && $search){
+			if($tagged){
 				if($g_tags != "")
 				{
-					if($g_parent != "")
-						$parent_patch = "OR (MATCH(tags) AGAINST('$g_tags' IN BOOLEAN MODE)>0.9) $parent $g_owner $g_score $g_rating";
-					else
-						$parent_patch = " AND parent='0'";
-					$neg_search = !strpos($g_tags,"+");
 					if ($neg_search) {
 						$g_tags = preg_replace("/\-/", "", $g_tags);
-						$query = "SELECT SQL_NO_CACHE id FROM $post_table WHERE id > $id AND NOT (MATCH(tags) AGAINST('$g_tags' IN BOOLEAN MODE)>0.9) $g_parent $g_owner $g_score $g_rating $blacklist $parent_patch ORDER BY id ASC LIMIT 1";
+						$query = "SELECT SQL_NO_CACHE id FROM $post_table WHERE id > $id AND (NOT (MATCH(tags) AGAINST('$g_tags' IN BOOLEAN MODE)>0.9) $g_parent $g_owner $g_score $g_rating $blacklist $parent_patch) ORDER BY id ASC LIMIT 1";
 					} else {
-						$query = "SELECT SQL_NO_CACHE id FROM $post_table WHERE id > $id AND (MATCH(tags) AGAINST('$g_tags' IN BOOLEAN MODE)>0.9) $g_parent $g_owner $g_score $g_rating $blacklist $parent_patch ORDER BY id ASC LIMIT 1";
+						$query = "SELECT SQL_NO_CACHE id FROM $post_table WHERE id > $id AND ((MATCH(tags) AGAINST('$g_tags' IN BOOLEAN MODE)>0.9) $g_parent $g_owner $g_score $g_rating $blacklist $parent_patch) ORDER BY id ASC LIMIT 1";
 					}
+				}
+				else if($g_parent != "" || $g_owner != "" || $g_rating != "" || $g_score != "")
+				{
+					$query = "SELECT SQL_NO_CACHE id FROM $post_table WHERE id > $id AND ($g_parent $g_owner $g_score $g_rating $blacklist $parent_patch) ORDER BY id ASC LIMIT 1";
+				}
+				else
+				{
+					if(strlen($search)-$count > 0)
+					{
+						$query = "SELECT * FROM $post_table WHERE id > $id AND tags LIKE '% $res %' ORDER BY id ASC LIMIT 1";
+					}
+					else
+						$query = "SELECT * FROM $post_table WHERE id > $id ORDER BY id ASC LIMIT 1";
 				}
 			}
 			else
