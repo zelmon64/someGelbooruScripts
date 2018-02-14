@@ -171,7 +171,10 @@ function copyMe(node) {
 						}
 					}
 				}
-				$images .= '<span class="thumb"><a id="p'.$row['id'].'" href="index.php?page=post&amp;s=view&amp;id='.$row['id'].'"><img class="thumb" src="'.$thumbnail_url.'/'.$row['directory'].'/thumbnail_'.$row['image'].'" alt="post" border="0" title="'.$row['tags'].' score:'.$row['score'].' rating:'. $row['rating'].'"/></a>
+				$images .= '<span class="thumb"><a id="p'.$row['id'].'" href="index.php?page=post&amp;s=view&amp;id='.$row['id'].'';
+				if((isset($_GET["tags"]) && $_GET["tags"] != "all"))
+					$images .= '&amp;tags='.$_GET['tags'].'';
+				$images .= '"><img class="thumb" src="'.$thumbnail_url.'/'.$row['directory'].'/thumbnail_'.$row['image'].'" alt="post" border="0" title="'.$row['tags'].' score:'.$row['score'].' rating:'. $row['rating'].'"/></a>
 				<script type="text/javascript">
 				posts['.$row['id'].'] = {\'tags\':\''.strtolower(str_replace('\\',"&#92;",str_replace("'","&#039;",$tags))).'\'.split(/ /g), \'rating\':\''.$row['rating'].'\', \'score\':'.$row['score'].', \'user\':\''.str_replace('\\',"&#92;",str_replace(' ','%20',str_replace("'","&#039;",$row['owner']))).'\'}
 				</script>';
@@ -197,7 +200,7 @@ function copyMe(node) {
 				$row = $result->fetch_assoc();
 				$t_decode = urlencode(html_entity_decode($ttags,ENT_NOQUOTES,"UTF-8"));
 				$c_decode = urlencode(html_entity_decode($current,ENT_NOQUOTES,"UTF-8"));
-				echo '<li><a href="index.php?page=post&amp;s=list&amp;tags='.$t_decode."+".$c_decode.'">+</a><a href="index.php?page=post&amp;s=list&amp;tags='.$t_decode."+-".$c_decode.'">-</a> <span style="color: #a0a0a0;"><a href="'.$site_url.'wiki/index.php?page=Tags-'.ucfirst($row['category']).'-'.ucfirst($c_decode).'">?</a> <a href="index.php?page=post&amp;s=list&amp;tags='.$c_decode.'" class="'.$row['category'].'">'.ucfirst(str_replace("_"," ",$current)).'</a> '.$row['index_count'].'</span></li>';
+				echo '<li><a href="index.php?page=post&amp;s=list&amp;tags='.$t_decode."+".$c_decode.'">+</a> <a href="index.php?page=post&amp;s=list&amp;tags='.$t_decode."+-".$c_decode.'">-</a> <span style="color: #a0a0a0;"><a href="'.$site_url.'wiki/index.php?page=Tags-'.ucfirst($row['category']).'-'.ucfirst($c_decode).'">?</a> <a href="index.php?page=post&amp;s=list&amp;tags='.$c_decode.'" class="'.$row['category'].'">'.ucfirst(str_replace("_"," ",$current)).'</a> '.$row['index_count'].'</span></li>';
 			}
 			//Print out image results and filter javascript
 			echo '<li><br /><br /></li></ul></div></div><div class="content"><div>';

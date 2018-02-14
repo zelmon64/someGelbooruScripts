@@ -23,11 +23,19 @@
 		exit;
 	}
 	$prev_next = $post->prev_next($id);
+	if(isset($_GET["tags"]) && $_GET["tags"] != "all"){
+		$prev_next_tagged = $post->prev_next($id, str_replace("%",'',str_replace("'","&#039;",str_replace('"','&quot;',$_GET['tags']))));
+		//$prev_next_tagged = $post->prev_next($id, $_GET['tags']);
+	} else
+		$prev_next_tagged = $prev_next;
 	//global $special_tags;
 	
 	if(!is_dir("$main_cache_dir".""."\cache/$id"))
 		$cache->create_page_cache("cache/$id");
-	$data = $cache->load("cache/".$id."/post.cache");
+	if(!(isset($_GET["tags"]) && $_GET["tags"] != "all"))
+		$data = $cache->load("cache/".$id."/post.cache");
+	else
+		$data = $cache->load("cache/".$id."/post_".str_replace("%",'',str_replace("'","q",str_replace('"','Q',str_replace(" ","",str_replace('-','N',$_GET['tags']))))).".cache");
 	if($data !== false)
 	{
 		echo str_replace("f6ca1c7d5d00a2a3fb4ea2f7edfa0f96a6d09c11717f39facabad2d724f16fbb",$domain,$data);
@@ -66,7 +74,13 @@
 		echo '<div class="sidebar"><div class="space">
 		<h5>Search</h5>
 		<form action="index.php?page=search" method="post">
-		<input id="stags" name="tags" size="20" type="text" />
+		<input id="stags" name="tags" size="20" type="text" ';
+		if(isset($_GET["tags"]) && $_GET["tags"] != "all"){
+			echo 'value="';
+			print str_replace("%",'',str_replace("'","&#039;",str_replace('"','&quot;',$_GET['tags'])));
+			echo '"';
+		}
+		echo ' />
 		<br /><input name="commit" style="margin-top: 3px; background: #fff; border: 1px solid #dadada; width: 172px;" type="submit" value="Search" />
 		</form><small>(Supports wildcard *)</small>
 		</div>
@@ -74,6 +88,10 @@
 		<!--<h5>Tags</h5>-->
 		<ul>';
 		//foreach($special_tags as $cur_tag)
+		if(isset($_GET['tags']) && $_GET['tags'] != "" && $_GET['tags'] != "all")
+			$tttags = $db->real_escape_string(str_replace("'","&#039;",$_GET['tags']));
+		else
+			$tttags = "";
 		foreach($categories as $cat => $tag_arr)
 		{
 			echo "<h5 class=".$cat.">".ucfirst(str_replace('_',' ',$cat));
@@ -91,8 +109,10 @@
 					{
 						if(ctype_alpha($spec_tag[$i]) && ($spec_tag[$i-1] == '.' || $spec_tag[$i-1] == '('))
 							$spec_tag[$i] = strtoupper($spec_tag[$i]);
-					}
-				echo '<li><span style="color: #a0a0a0;"><a href="'.$site_url.'wiki/index.php?page=Tags-'.ucfirst($cat).'-'.ucfirst($spec_tag).'">?</a> '.
+				}
+				$t_decode = urlencode(html_entity_decode($tttags,ENT_NOQUOTES,"UTF-8"));
+				$c_decode = urlencode(html_entity_decode($current,ENT_NOQUOTES,"UTF-8"));
+				echo '<li><a href="index.php?page=post&amp;s=list&amp;tags='.$t_decode."+".$c_decode.'">+</a> <a href="index.php?page=post&amp;s=list&amp;tags='.$t_decode."+-".$c_decode.'">-</a> <span style="color: #a0a0a0;"><a href="'.$site_url.'wiki/index.php?page=Tags-'.ucfirst($cat).'-'.ucfirst($spec_tag).'">?</a> '.
 				'<a href="index.php?page=post&amp;s=list&amp;tags='.$spec_tag.'" class="'.$cat.'">'.
 					ucwords(str_replace('_',' ', $spec_tag)).
 				"</a> ".$count['index_count']."</span></li>";
@@ -102,8 +122,10 @@
 		echo "<h5 style='color:blue;'>General Tags</h5>";
 		foreach($ttags as $current)
 		{
+			$t_decode = urlencode(html_entity_decode($tttags,ENT_NOQUOTES,"UTF-8"));
+			$c_decode = urlencode(html_entity_decode($current,ENT_NOQUOTES,"UTF-8"));
 			$count = $post->index_count($current);
-			echo '<li><span style="color: #a0a0a0;"><a href="'.$site_url.'wiki/index.php?page=Tags-general-'.$current.'">?</a> <a href="index.php?page=post&amp;s=list&amp;tags='.$current.'" class="general">'.ucwords(str_replace('_',' ',$current))."</a> ".$count['index_count']."</span></li>";
+			echo '<li><a href="index.php?page=post&amp;s=list&amp;tags='.$t_decode."+".$c_decode.'">+</a> <a href="index.php?page=post&amp;s=list&amp;tags='.$t_decode."+-".$c_decode.'">-</a> <span style="color: #a0a0a0;"><a href="'.$site_url.'wiki/index.php?page=Tags-General-'.ucfirst($current).'">?</a> <a href="index.php?page=post&amp;s=list&amp;tags='.$current.'" class="general">'.ucwords(str_replace('_',' ',$current))."</a> ".$count['index_count']."</span></li>";
 		}
 		echo '<li><br /><br /><br /><br /><br /><br /><br /><br /></li></ul></div></div>';
 		if($post_data['title'] != "")
@@ -111,12 +133,24 @@
 		else
 			echo '<h2>Untitled</h2><br/>';
 		echo '<a rel ="bytebox" href="f6ca1c7d5d00a2a3fb4ea2f7edfa0f96a6d09c11717f39facabad2d724f16fbb/images/'.$post_data['directory'].'/'.$post_data['image'].'">Original Image</a> | ';
-		if($prev_next['0'] != "")
-			echo '<a href="index.php?page=post&amp;s=view&amp;id='.$prev_next['0'].'">Previous</a> | ';
+		if($prev_next_tagged['0'] != ""){
+			echo '<a href="index.php?page=post&amp;s=view&amp;id='.$prev_next_tagged['0'].'';
+			if(isset($_GET["tags"]) && $_GET["tags"] != "all"){
+				echo '&amp;tags=';
+				print $_GET['tags'];
+				}
+			echo '">Previous</a> | ';
+		}
 		else
 			echo '<font color="grey">Previous</font> | ';
-		if($prev_next['1'] != "")
-			echo '<a href="index.php?page=post&amp;s=view&amp;id='.$prev_next['1'].'">Next</a> | ';
+		if($prev_next_tagged['1'] != ""){
+			echo '<a href="index.php?page=post&amp;s=view&amp;id='.$prev_next_tagged['1'].'';
+			if(isset($_GET["tags"]) && $_GET["tags"] != "all"){
+				echo '&amp;tags=';
+				print $_GET['tags'];
+				}
+			echo '">Next</a> | ';
+		}
 		else
 			echo '<font color="grey">Next</font> | ';
 		echo '<b>Score</b> <a href="#" onclick="Javascript:post_vote(\''.$id.'\', \'up\')">+</a> <a href="#" onclick="Javascript:post_vote(\''.$id.'\', \'down\')">-</a> <a id="psc">'.$post_data['score'].'</a> | ';
@@ -251,7 +285,10 @@
 		$data = '';
 		$data = ob_get_contents();
 		ob_end_clean();
-		$cache->save("cache/".$id."/post.cache",$data);
+		if(!(isset($_GET["tags"]) && $_GET["tags"] != "all"))
+			$cache->save("cache/".$id."/post.cache",$data);
+		else
+			$cache->save("cache/".$id."/post_".str_replace("%",'',str_replace("'","q",str_replace('"','Q',str_replace(" ","",str_replace('-','N',$_GET['tags']))))).".cache",$data);
 		echo str_replace("f6ca1c7d5d00a2a3fb4ea2f7edfa0f96a6d09c11717f39facabad2d724f16fbb",$domain,$data);
 		flush();
 	}
