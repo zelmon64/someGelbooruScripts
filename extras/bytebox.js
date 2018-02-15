@@ -32,8 +32,11 @@ var bytebox=function(){
 
 			
 			i.style.top=tp+"px";}
+			if(lp<0){
+				lp=0;
+			}
 			i.style.left=lp+"px";
-			n=d.createElement('img');n.src=im.src;i.appendChild(n);c=d.createElement('div');c.id='bb_da';cl=d.createElement('a');tn = document.createTextNode('CLOSE');
+			n=d.createElement('img');n.src=im.src;n.id='bb_img';i.appendChild(n);c=d.createElement('div');c.id='bb_da';cl=d.createElement('a');tn = document.createTextNode('CLOSE');
 			cl.href="javascript:void(0)";cl.onclick=bytebox.r;cl.id="bb_a";
 			d.body.appendChild(i);cl.appendChild(tn);c.appendChild(cl);i.appendChild(c);
 if((80+ih)>bytebox.ht()){
