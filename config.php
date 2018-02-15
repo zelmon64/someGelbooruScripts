@@ -85,13 +85,13 @@
 	//enable or disable anonymous reports set false to disable
 	$anon_report = false;
 	//enable or disable anonymous edits set false to disable
-	$anon_edit = true;
+	$anon_edit = false;
 	//enable or disable anonymous comments set false to disable
 	$anon_comment = true;
 	//enable or disable anonymous voting set false to disable
 	$anon_vote = false;
 	//enable or disable anonymous post adding
-	$anon_can_upload = true;
+	$anon_can_upload = false;
 	//Edit limit in minutes. If time is over this, edit will not happen.
 	$edit_limit = 20;
 	//cache dir, all cache will be stored in subdirs to this. Put it on RAM or FAST Raid drives.
