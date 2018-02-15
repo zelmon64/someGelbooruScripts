@@ -6,7 +6,7 @@
 
 		}
 
-		function prepare_tags($search)
+		function prepare_tags($search, $sort = "")
 		{
 			global $db, $post_table;
 			$search = $db->real_escape_string($search);
@@ -100,9 +100,9 @@
 				$neg_search = !strpos($g_tags,"+");
 				if ($neg_search) {
 					$g_tags = preg_replace("/\-/", "", $g_tags);
-					$query = "SELECT id, image, directory, score, rating, tags, owner FROM $post_table WHERE NOT (MATCH(tags) AGAINST('$g_tags' IN BOOLEAN MODE)>0.9) $g_parent $g_owner $g_score $g_rating $blacklist $parent_patch ORDER BY id DESC";
+					$query = "SELECT id, image, directory, score, rating, tags, owner FROM $post_table WHERE NOT (MATCH(tags) AGAINST('$g_tags' IN BOOLEAN MODE)>0.9) $g_parent $g_owner $g_score $g_rating $blacklist $parent_patch ORDER BY $sort id DESC";
 				} else {
-					$query = "SELECT id, image, directory, score, rating, tags, owner FROM $post_table WHERE (MATCH(tags) AGAINST('$g_tags' IN BOOLEAN MODE)>0.9) $g_parent $g_owner $g_score $g_rating $blacklist $parent_patch ORDER BY id DESC";
+					$query = "SELECT id, image, directory, score, rating, tags, owner FROM $post_table WHERE (MATCH(tags) AGAINST('$g_tags' IN BOOLEAN MODE)>0.9) $g_parent $g_owner $g_score $g_rating $blacklist $parent_patch ORDER BY $sort id DESC";
 				}
 			}
 			else if($g_parent != "" || $g_owner != "" || $g_rating != "" || $g_score != "")
@@ -123,7 +123,7 @@
 					$blacklist = str_replace('AND',"",$blacklist);
 				if($g_parent == "")
 					$parent_patch = " AND parent='0'";
-				$query = "SELECT id, image, directory, score, rating, tags, owner FROM $post_table WHERE $g_parent $g_owner $g_score $g_rating $blacklist $parent_patch ORDER BY id DESC";
+				$query = "SELECT id, image, directory, score, rating, tags, owner FROM $post_table WHERE $g_parent $g_owner $g_score $g_rating $blacklist $parent_patch ORDER BY $sort id DESC";
 			}
 			else
 			{
@@ -131,10 +131,10 @@
 				if(strlen($search)-$count > 0)
 				{
 					$res = str_replace("*","",$search);
-					$query = "SELECT * FROM $post_table WHERE tags LIKE '% $res %' ORDER BY id DESC";
+					$query = "SELECT * FROM $post_table WHERE tags LIKE '% $res %' ORDER BY $sort id DESC";
 				}
 				else
-					$query = "SELECT * FROM $post_table ORDER BY id DESC";
+					$query = "SELECT * FROM $post_table ORDER BY $sort id DESC";
 			}
 			return $query;
 		}

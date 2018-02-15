@@ -8,6 +8,7 @@
 	$cache = new cache();
 	$user = new user();
 	$domain = $cache->select_domain();
+	$misc = new misc();
 ?>
 <script type="text/javascript">
 var posts = {}; var pignored = {}; var showing_IDs = false;
@@ -60,6 +61,14 @@ function copyMe(node) {
 	$search = new search();
 	$no_cache = null;
 	$tag_count = null;
+	$scoresort = "score DESC,";
+	if(isset($_GET['sort']) && $_GET['sort'] != "") {
+		$sort = $_GET['sort'];
+		if ($sort == 'newest') { $scoresort = ""; } 
+	} else { $sort = "none"; }
+	if($sort == "none" && (isset($_GET['tags']) && $_GET['tags'] != "" && $_GET['tags'] != "all")) {
+		$sort = "score";
+	}
 	//No tags  have been searched for so let's check the last_update value to update our main page post count for parent posts. Updated once a day.
 	if(!isset($_GET['tags']) || isset($_GET['tags']) && $_GET['tags'] == "all" || isset($_GET['tags']) && $_GET['tags'] == "")
 	{
@@ -88,6 +97,7 @@ function copyMe(node) {
 		$misc = new misc();
 		if(strpos(strtolower($new_tag_cache),"parent:") === false && strpos(strtolower($new_tag_cache),"user:") === false && strpos(strtolower($new_tag_cache),"rating:") === false && strpos($new_tag_cache,"*") === false)
 			$new_tag_cache = $misc->windows_filename_fix($new_tag_cache);
+		if ($sort == 'score') { $new_tag_cache .= "_score"; } 
 		if(isset($_GET['pid']) && is_numeric($_GET['pid']) && $_GET['pid'] > 0)
 			$page = ($_GET['pid']/$limit)+1;
 		else
@@ -96,7 +106,7 @@ function copyMe(node) {
 		{
 			if(!is_dir("$main_cache_dir".""."search_cache/"))
 				@mkdir("$main_cache_dir".""."search_cache");
-			$query = $search->prepare_tags(implode(" ",$tags));
+			$query = $search->prepare_tags(implode(" ",$tags), $scoresort);
 			$result = $db->query($query) or die($db->error);
 			$numrows = $result->num_rows;
 			$result->free_result();
@@ -139,9 +149,10 @@ function copyMe(node) {
 			$page = $db->real_escape_string($_GET['pid']);
 		else
 			$page = 0;
-		if(!isset($_GET['tags']) || isset($_GET['tags']) && $_GET['tags'] == "all" || isset($_GET['tags']) && $_GET['tags'] == "")
-			$query = "SELECT id, image, directory, score, rating, tags, owner FROM $post_table WHERE parent = '0' ORDER BY id DESC LIMIT $page, $limit";
-		else
+		if(!isset($_GET['tags']) || isset($_GET['tags']) && $_GET['tags'] == "all" || isset($_GET['tags']) && $_GET['tags'] == ""){
+			//$query = "SELECT id, image, directory, score, rating, tags, owner FROM $post_table WHERE parent = '0' ORDER BY id DESC LIMIT $page, $limit";
+			$query = "SELECT id, image, directory, score, rating, tags, owner FROM $post_table WHERE parent = '0' " . $search->blacklist_fragment() . " ORDER BY $scoresort id DESC LIMIT $page, $limit";
+		} else
 		{
 			if($no_cache === true || $tag_count > 1 || strpos(strtolower($new_tag_cache),"user:") !== false || strpos(strtolower($new_tag_cache),"rating:") !== false || substr($new_tag_cache,0,1) == "-" || strpos(strtolower($new_tag_cache),"*") !== false || strpos(strtolower($new_tag_cache),"parent:") !== false)
 				$query = $query." LIMIT $page, $limit";
@@ -174,6 +185,8 @@ function copyMe(node) {
 				$images .= '<span class="thumb"><a id="p'.$row['id'].'" href="index.php?page=post&amp;s=view&amp;id='.$row['id'].'';
 				if((isset($_GET["tags"]) && $_GET["tags"] != "all"))
 					$images .= '&amp;tags='.$_GET['tags'].'';
+				if($sort != "newest")
+					$images .= '&amp;sort=score';
 				$images .= '"><img class="thumb" src="'.$thumbnail_url.'/'.$row['directory'].'/thumbnail_'.$row['image'].'" alt="post" border="0" title="'.$row['tags'].' score:'.$row['score'].' rating:'. $row['rating'].'"/></a>
 				<script type="text/javascript">
 				posts['.$row['id'].'] = {\'tags\':\''.strtolower(str_replace('\\',"&#92;",str_replace("'","&#039;",$tags))).'\'.split(/ /g), \'rating\':\''.$row['rating'].'\', \'score\':'.$row['score'].', \'user\':\''.str_replace('\\',"&#92;",str_replace(' ','%20',str_replace("'","&#039;",$row['owner']))).'\'}
@@ -183,6 +196,32 @@ function copyMe(node) {
 				$images .= "</span>";
 			}
 			$result->free_result();
+			$newest = '';
+			if ($sort == "none") 
+			{
+				$query = "SELECT id, image, directory, score, rating, tags, owner FROM $post_table WHERE parent = '0' " . $search->blacklist_fragment() . " ORDER BY id DESC LIMIT 8";
+				$result = $db->query($query) or die($db->error);
+				//Limit main tag listing to $tags_limit tags. Keep the loop down to the minimum really.
+				$newest .= "<div id='newest_images'><h5><a href=index.php?page=post&s=list&tags=all&sort=newest>Newest Images</a></h5><div>";
+				while($row = $result->fetch_assoc())
+				{
+					$newest .= '<span class="thumb"><a id="p'.$row['id'].'" href="index.php?page=post&amp;s=view&amp;id='.$row['id'].'"><img src="'.$thumbnail_url.$misc->getThumb($row['image'], $row['directory']).'" alt="post" border="0" title="'.$row['tags'].' score:'.$row['score'].' rating:'. $row['rating'].'"/></a></span>';
+					$script .= 'posts['.$row['id'].'] = {\'tags\':\''.strtolower(str_replace('\\',"&#92;",str_replace("'","&#039;",$tags))).'\'.split(/ /g), \'rating\':\''.$row['rating'].'\', \'score\':'.$row['score'].', \'user\':\''.str_replace('\\',"&#92;",str_replace(' ','%20',str_replace("'","&#039;",$row['owner']))).'\'};';
+				}
+				$result->free_result();
+				$newest .= "<div class=space style='clear:both;'></div></div></div><div id='highest_rated_images'><h5><a href=index.php?page=post&s=list&tags=all&sort=score>Highest Rated Images</a></h5><div>";
+				$images .= "</div></div>";
+			}
+			else if ($sort == "score") 
+			{
+				$newest .= "<div id='highest_rated_images'><h5>Highest Rated Images</h5><div>";
+				$images .= "</div></div>";
+			}
+			else 
+			{
+				$newest .= "<div id='newest_images'><h5>Newest Images</h5><div>";
+				$images .= "</div></div>";
+			} 
 			if(isset($_GET['tags']) && $_GET['tags'] != "" && $_GET['tags'] != "all")
 				$ttags = $db->real_escape_string(str_replace("'","&#039;",$_GET['tags']));
 			else
@@ -200,7 +239,7 @@ function copyMe(node) {
 				$row = $result->fetch_assoc();
 				$t_decode = urlencode(html_entity_decode($ttags,ENT_NOQUOTES,"UTF-8"));
 				$c_decode = urlencode(html_entity_decode($current,ENT_NOQUOTES,"UTF-8"));
-				echo '<li><a href="index.php?page=post&amp;s=list&amp;tags='.$t_decode."+".$c_decode.'">+</a> <a href="index.php?page=post&amp;s=list&amp;tags='.$t_decode."+-".$c_decode.'">-</a> <span style="color: #a0a0a0;"><a href="'.$site_url.'wiki/index.php?page=Tags-'.ucfirst($row['category']).'-'.ucfirst($c_decode).'">?</a> <a href="index.php?page=post&amp;s=list&amp;tags='.$c_decode.'" class="'.$row['category'].'">'.ucfirst(str_replace("_"," ",$current)).'</a> '.$row['index_count'].'</span></li>';
+				echo '<li><a href="index.php?page=post&amp;s=list&amp;sort='.$sort.'&amp;tags='.$t_decode."+".$c_decode.'">+</a> <a href="index.php?page=post&amp;s=list&amp;sort='.$sort.'&amp;tags='.$t_decode."+-".$c_decode.'">-</a> <span style="color: #a0a0a0;"><a href="'.$site_url.'wiki/index.php?page=Tags-'.ucfirst($row['category']).'-'.ucfirst($c_decode).'">?</a> <a href="index.php?page=post&amp;s=list&amp;sort='.$sort.'&amp;tags='.$c_decode.'" class="'.$row['category'].'">'.ucfirst(str_replace("_"," ",$current)).'</a> '.$row['index_count'].'</span></li>';
 			}
 			//Print out image results and filter javascript
 			echo '<li><br /><br /></li></ul></div></div><div class="content"><div>';
@@ -210,11 +249,12 @@ function copyMe(node) {
 			filterPosts(posts)
 			//]]>
 			</script>';
+			echo $newest;
 			echo $images;
 
 			//Pagination function. This should work for the whole site... Maybe.
 			$misc = new misc();
-			print $misc->pagination($_GET['page'],$_GET['s'],$id,$limit,$page_limit,$numrows,$_GET['pid'],$_GET['tags']);
+			print $misc->pagination($_GET['page'],$_GET['s'],$id,$limit,$page_limit,$numrows,$_GET['pid'],$_GET['tags'],false,$sort);
 
 		}
 		//Cache doesn't exist for search, make one.

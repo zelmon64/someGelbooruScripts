@@ -14,7 +14,7 @@
 				$offset = $pos+1;
 				$links[] = $pos;
 				$i++;
-				
+
 			}
 			foreach($links as $pos)
 			{
@@ -72,19 +72,26 @@
 		{
 			require "config.php";
 			global $site_email, $site_url3;
-			$headers = "";
+			$headers = array();
 			$eol = "\r\n";
-			$headers .= "From: no-reply at ".$site_url3." <$site_email>".$eol; 
-			$headers .= "X-Mailer:  Microsoft Office Outlook 12.0".$eol;
-			$headers .= "MIME-Version: 1.0".$eol;
-			$headers .= 'Content-Type: text/html; charset="UTF-8"'.$eol;
-			$headers .= "Content-Transfer-Encoding: 8bit".$eol.$eol;
-			if(substr($body,-8,strlen($body)) != $eol.$eol)
+
+			$headers[] = "MIME-Version: 1.0";
+			$headers[] = "Content-type: text/plain; charset=iso-8859-1";
+			$headers[] = "From: no-reply at ".$site_url3." <$site_email>";
+			$headers[] = "Subject: {$subject}";
+			$headers[] = "X-Mailer: PHP/".phpversion();
+			$headers[] = 'Content-Type: text/html; charset="UTF-8"';
+			$headers[] = "Content-Transfer-Encoding: 8bit";
+
+			if(substr($body,-8,strlen($body)) != $eol.$eol) {
 				$body = $body.$eol.$eol;
-			if(@mail($reciver,$subject,$body,$headers))
+			}
+
+			if(@mail($reciver,$subject,$body,implode($eol, $headers))) {
 				return true;
-			else
+			} else {
 				return false;
+			}
 		}
 
 		function windows_filename_fix($new_tag_cache)
@@ -111,9 +118,9 @@
 				$new_tag_cache = str_replace(">","&gt;",$new_tag_cache);
 			if(strpos($new_tag_cache,"?") !== false)
 				$new_tag_cache = str_replace("?","&#063;",$new_tag_cache);
-			return $new_tag_cache;	
+			return $new_tag_cache;
 		}
-		
+
 		function ReadHeader($socket)
 		{
 			$i=0;
@@ -146,7 +153,7 @@
 			else
 				return 0;
 		}
-		
+
 		function swap_bbs_tags($data)
 		{
 			$pattern = array();
@@ -169,29 +176,29 @@
 			}
 			return $data;
 		}
-		
+
 		function date_words($date_now)
 		{
 			$hour_now = date('g:i:s A',$date_now);
 			if($date_now+60*60*24 >= time())
-				$date_now = "Today"; 
-			else if($date_now+60*60*48 >= time()) 
-				$date_now = "Yesterday"; 
+				$date_now = "Today";
+			else if($date_now+60*60*48 >= time())
+				$date_now = "Yesterday";
 			else if(((int)((time()-$date_now)/(24*60*60)))<=7)
 			{
-				$a = time()-$date_now; 
+				$a = time()-$date_now;
 				$a = (int)($a/(24*60*60));
-				$date_now = $a." days ago"; 
+				$date_now = $a." days ago";
 			}
 			else if(((int)((time()-$date_now)/(24*60*60)))<=31)
 			{
-				$a = time()-$date_now; 
+				$a = time()-$date_now;
 				$a = (int)($a/(24*60*60*7));
 				$date_now = $a." weeks ago";
 			}
 			else if(((int)((time()-$date_now)/(24*60*60)))<=365)
 			{
-				$a = time()-$date_now; 
+				$a = time()-$date_now;
 				$a = (int)($a/(24*60*60*31));
 				$date_now = $a." months ago";
 			}
@@ -204,7 +211,7 @@
 			$date_now = '<span title="'.$hour_now.'">'.$date_now.'</span>';
 			return $date_now;
 		}
-		
+
 		public function is_html($data)
 		{
 			if(preg_match("#<script|<html|<head|<title|<body|<pre|<table|<a\s+href|<img|<plaintext|<div|<frame|<iframe|<li|type=#si", $data) == 1)
@@ -212,8 +219,8 @@
 			else
 				return false;
 		}
-		
-		function pagination($page_type,$sub = false,$id = false,$limit = false,$page_limit = false,$count = false,$page = false,$tags = false, $query = false)
+
+		function pagination($page_type,$sub = false,$id = false,$limit = false,$page_limit = false,$count = false,$page = false,$tags = false, $query = false, $sort = false)
 		{
 			$lowerlimit = 0;
 			$has_id = "";
@@ -225,6 +232,8 @@
 				$sub = '&amp;s='.$sub.'';
 			if(isset($query) && $query != "" && $query)
 				$query = '&amp;query='.urlencode($query).'';
+            if(isset($sort) && $sort != "" && $sort) 
+                $has_sort = '&amp;sort='.$sort.'';
 			$pages = intval($count/$limit);
 			if ($count%$limit)
 				$pages++;
@@ -232,7 +241,7 @@
 			$total = $pages;
 			if ($pages < 1 || $pages == 0 || $pages == "")
 				$total = 1;
-				
+
 			$first = $page + 1;
 			$last = $count;
 			if (!((($page + $limit) / $limit) >= $pages) && $pages != 1)
@@ -250,10 +259,10 @@
 			if($start > $lowerlimit)
 				$start = $lowerlimit;
 			$lastpage = $limit*($pages - 1);
-			if($page != 0 && !((($page+$limit) / $limit) > $pages)) 
-			{ 
+			if($page != 0 && !((($page+$limit) / $limit) > $pages))
+			{
 				$back_page = $page - $limit;
-				$output .=  '<a href="?page='.$page_type.''.$sub.''.$query.''.$has_id.''.$has_tags.'&amp;pid=0" alt="first page">&lt;&lt;</a><a href="?page='.$page_type.''.$sub.''.$query.''.$has_id.''.$has_tags.'&amp;pid='.$back_page.'" alt="back">&lt;</a>';
+				$output .=  '<a href="?page='.$page_type.''.$sub.''.$query.''.$has_id.''.$has_tags.'&amp;pid=0" alt="first page">&lt;&lt;</a><a href="?page='.$page_type.''.$sub.''.$query.''.$has_id.''.$has_tags.''.$has_sort.'&amp;pid='.$back_page.'" alt="back">&lt;</a>';
 			}
 			for($i=$start; $i <= $tmp_limit; $i++)
 			{
@@ -263,16 +272,25 @@
 					if ($ppage == $page)
 						$output .=  ' <b>'.$i.'</b> ';
 					else
-						$output .=  '<a href="?page='.$page_type.''.$sub.''.$query.''.$has_id.''.$has_tags.'&amp;pid='.$ppage.'">'.$i.'</a>';
+						$output .=  '<a href="?page='.$page_type.''.$sub.''.$query.''.$has_id.''.$has_tags.''.$has_sort.'&amp;pid='.$ppage.'">'.$i.'</a>';
 				}
 			}
-			if (!((($page+$limit) / $limit) >= $pages) && $pages != 1) 
-			{ 
+			if (!((($page+$limit) / $limit) >= $pages) && $pages != 1)
+			{
 				// If last page don't give next link.
 				$next_page = $page + $limit;
-				$output .= '<a href="?page='.$page_type.''.$sub.''.$query.''.$has_id.''.$has_tags.'&amp;pid='.$next_page.'" alt="next">&gt;</a><a href="?page='.$page_type.''.$sub.''.$query.''.$has_id.''.$has_tags.'&amp;pid='.$lastpage.'" alt="last page">&gt;&gt;</a>';
+				$output .= '<a href="?page='.$page_type.''.$sub.''.$query.''.$has_id.''.$has_tags.''.$has_sort.'&amp;pid='.$next_page.'" alt="next">&gt;</a><a href="?page='.$page_type.''.$sub.''.$query.''.$has_id.''.$has_tags.''.$has_sort.'&amp;pid='.$lastpage.'" alt="last page">&gt;&gt;</a>';
 			}
 			return $output;
 		}
+
+		function getThumb($image, $dir) {
+			$thumb = explode('.', $image);
+			array_pop($thumb);
+			$thumb = implode('.', $thumb).".jpg";
+			$thumb = '/'.$dir."/thumbnail_".$thumb;
+			return $thumb;
+		}
+
 	}
 ?>

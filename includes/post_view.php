@@ -22,20 +22,25 @@
 		header('Location: index.php?page=post&s=list');
 		exit;
 	}
-	$prev_next = $post->prev_next($id);
+	if(isset($_GET["sort"]) && $_GET["sort"] != "none")
+		$sort = "score";
+	else
+		$sort = "";
+	$prev_next = $post->prev_next($id, false , $sort);
 	if(isset($_GET["tags"]) && $_GET["tags"] != "all"){
-		$prev_next_tagged = $post->prev_next($id, str_replace("%",'',str_replace("'","&#039;",str_replace('"','&quot;',$_GET['tags']))));
-		//$prev_next_tagged = $post->prev_next($id, $_GET['tags']);
+		$prev_next_tagged = $post->prev_next($id, str_replace("%",'',str_replace("'","&#039;",str_replace('"','&quot;',$_GET['tags']))), $sort);
 	} else
 		$prev_next_tagged = $prev_next;
 	//global $special_tags;
 	
 	if(!is_dir("$main_cache_dir".""."\cache/$id"))
 		$cache->create_page_cache("cache/$id");
-	if(!(isset($_GET["tags"]) && $_GET["tags"] != "all"))
-		$data = $cache->load("cache/".$id."/post.cache");
-	else
-		$data = $cache->load("cache/".$id."/post_".str_replace("%",'',str_replace("'","q",str_replace('"','Q',str_replace(" ","",str_replace('-','N',$_GET['tags']))))).".cache");
+	$cached_file = "cache/".$id."/post";
+	if(isset($_GET["tags"]) && $_GET["tags"] != "all")
+		$cached_file .= "_".str_replace("%",'',str_replace("'","q",str_replace('"','Q',str_replace(" ","",str_replace('-','N',$_GET['tags'])))));
+	if(isset($_GET["sort"]) && $_GET["sort"] == "score")
+		$cached_file .= "_score";
+	$data = $cache->load($cached_file."cache");
 	if($data !== false)
 	{
 		echo str_replace("f6ca1c7d5d00a2a3fb4ea2f7edfa0f96a6d09c11717f39facabad2d724f16fbb",$domain,$data);
@@ -112,8 +117,8 @@
 				}
 				$t_decode = urlencode(html_entity_decode($tttags,ENT_NOQUOTES,"UTF-8"));
 				$c_decode = urlencode(html_entity_decode($current,ENT_NOQUOTES,"UTF-8"));
-				echo '<li><a href="index.php?page=post&amp;s=list&amp;tags='.$t_decode."+".$c_decode.'">+</a> <a href="index.php?page=post&amp;s=list&amp;tags='.$t_decode."+-".$c_decode.'">-</a> <span style="color: #a0a0a0;"><a href="'.$site_url.'wiki/index.php?page=Tags-'.ucfirst($cat).'-'.ucfirst($spec_tag).'">?</a> '.
-				'<a href="index.php?page=post&amp;s=list&amp;tags='.$spec_tag.'" class="'.$cat.'">'.
+				echo '<li><a href="index.php?page=post&amp;s=list&amp;sort='.$sort.'&amp;tags='.$t_decode."+".$c_decode.'">+</a> <a href="index.php?page=post&amp;s=list&amp;sort='.$sort.'&amp;tags='.$t_decode."+-".$c_decode.'">-</a> <span style="color: #a0a0a0;"><a href="'.$site_url.'wiki/index.php?page=Tags-'.ucfirst($cat).'-'.ucfirst($spec_tag).'">?</a> '.
+				'<a href="index.php?page=post&amp;s=list&amp;sort='.$sort.'&amp;tags='.$spec_tag.'" class="'.$cat.'">'.
 					ucwords(str_replace('_',' ', $spec_tag)).
 				"</a> ".$count['index_count']."</span></li>";
 			}
@@ -125,7 +130,7 @@
 			$t_decode = urlencode(html_entity_decode($tttags,ENT_NOQUOTES,"UTF-8"));
 			$c_decode = urlencode(html_entity_decode($current,ENT_NOQUOTES,"UTF-8"));
 			$count = $post->index_count($current);
-			echo '<li><a href="index.php?page=post&amp;s=list&amp;tags='.$t_decode."+".$c_decode.'">+</a> <a href="index.php?page=post&amp;s=list&amp;tags='.$t_decode."+-".$c_decode.'">-</a> <span style="color: #a0a0a0;"><a href="'.$site_url.'wiki/index.php?page=Tags-General-'.ucfirst($current).'">?</a> <a href="index.php?page=post&amp;s=list&amp;tags='.$current.'" class="general">'.ucwords(str_replace('_',' ',$current))."</a> ".$count['index_count']."</span></li>";
+			echo '<li><a href="index.php?page=post&amp;s=list&amp;sort='.$sort.'&amp;tags='.$t_decode."+".$c_decode.'">+</a> <a href="index.php?page=post&amp;s=list&amp;sort='.$sort.'&amp;tags='.$t_decode."+-".$c_decode.'">-</a> <span style="color: #a0a0a0;"><a href="'.$site_url.'wiki/index.php?page=Tags-General-'.ucfirst($current).'">?</a> <a href="index.php?page=post&amp;s=list&amp;sort='.$sort.'&amp;tags='.$current.'" class="general">'.ucwords(str_replace('_',' ',$current))."</a> ".$count['index_count']."</span></li>";
 		}
 		echo '<li><br /><br /><br /><br /><br /><br /><br /><br /></li></ul></div></div>';
 		if($post_data['title'] != "")
@@ -138,7 +143,11 @@
 			if(isset($_GET["tags"]) && $_GET["tags"] != "all"){
 				echo '&amp;tags=';
 				print $_GET['tags'];
-				}
+			}
+			if(isset($_GET["sort"]) && $_GET["sort"] != "none"){
+				echo '&amp;sort=';
+				print $_GET['sort'];
+			}
 			echo '">Previous</a> | ';
 		}
 		else
@@ -148,7 +157,11 @@
 			if(isset($_GET["tags"]) && $_GET["tags"] != "all"){
 				echo '&amp;tags=';
 				print $_GET['tags'];
-				}
+			}
+			if(isset($_GET["sort"]) && $_GET["sort"] != "none"){
+				echo '&amp;sort=';
+				print $_GET['sort'];
+			}
 			echo '">Next</a> | ';
 		}
 		else
@@ -285,10 +298,7 @@
 		$data = '';
 		$data = ob_get_contents();
 		ob_end_clean();
-		if(!(isset($_GET["tags"]) && $_GET["tags"] != "all"))
-			$cache->save("cache/".$id."/post.cache",$data);
-		else
-			$cache->save("cache/".$id."/post_".str_replace("%",'',str_replace("'","q",str_replace('"','Q',str_replace(" ","",str_replace('-','N',$_GET['tags']))))).".cache",$data);
+		$cache->save($cached_file."cache",$data);
 		echo str_replace("f6ca1c7d5d00a2a3fb4ea2f7edfa0f96a6d09c11717f39facabad2d724f16fbb",$domain,$data);
 		flush();
 	}
