@@ -157,7 +157,7 @@ function post_vote(pid, up_down)
 	{
 		if(HttpRequest.readyState==4)
 		{
-			updateScore("psc",parseInt(HttpRequest.responseText));
+			updateScore("psc",HttpRequest.responseText);
 		}
 	}
 	pid = encodeURI(pid);
@@ -310,7 +310,7 @@ function filterPosts(posts) {
 	var ttags = Array()
 	var g = 0;        
 	var users = readCookie("user_blacklist").split(/[, ]|%20+/g)
-	var threshold = parseInt(readCookie("post_threshold")) || 0
+	var threshold = parseInt(readCookie("post_threshold")) || -2
 	tags.each(function(j){
 		if(j != "" && j != " "){
 			ttags[g] = j.toLowerCase();
@@ -349,10 +349,22 @@ function filterPosts(posts) {
 
 		if (hidden) 
 		{
-			//showHide('p' + i)
-			Element.hide('p' + i);
-			ignored.push('p' + i)
-			pignored[i] = i
+            
+            try {
+                //showHide('p' + i)
+                Element.hide('p' + i);
+                ignored.push('p' + i);
+                pignored[i] = i
+            } catch(e) {
+                console.log(e.message);
+            }
+            try {
+                Element.hide('np' + i);
+                ignored.push('np' + i);
+                pignored[i] = i
+            } catch(e) {
+                console.log(e.message);
+            }
 		}
 	}
 
@@ -363,7 +375,7 @@ function filterPosts(posts) {
 function filterCommentList(comment_size) 
 {
 	var tags = readCookie("tag_blacklist").split(/[, ]|%20+/g)
-	var threshold = parseInt(readCookie("post_threshold")) || 0
+	var threshold = parseInt(readCookie("post_threshold")) || -2
 	var ttags = Array()
 	var g = 0;
 	tags.each(function(j){
