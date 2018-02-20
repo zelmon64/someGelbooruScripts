@@ -24,6 +24,8 @@
 			require "tag_categories.php";
 	else if($_GET['page'] == "tag_category_change")
 			require "tag_category_edit.php";
+	else if($_GET['page'] == "jpie")
+			require "jpie.php";
 
 ?>
 <br></body></html>
