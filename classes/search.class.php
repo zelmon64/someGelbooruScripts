@@ -27,9 +27,12 @@
 				{
 					$g_parent = str_replace("parent:","",$current);
 					$parent = " AND id='$g_parent'";
- 					if(!is_numeric($g_parent))
-						$g_parent = '';
-					else
+ 					if(!is_numeric($g_parent)){
+						if($g_parent == 'any')
+							$parent = '';
+						else
+							$g_parent = '';
+					} else
 						$g_parent = " AND parent='$g_parent'";
 					$current = '';
 				}
@@ -93,7 +96,10 @@
 			$blacklist = $this->blacklist_fragment();
 			if($g_tags != "")
 			{
-				if($g_parent != "")
+				if($g_parent == "any"){
+					$parent_patch = '';
+					$g_parent = '';
+				} else if($g_parent != "")
 					$parent_patch = "OR (MATCH(tags) AGAINST('$g_tags' IN BOOLEAN MODE)>0.9) $parent $g_owner $g_score $g_rating";
 				else
 					$parent_patch = " AND parent='0'";
@@ -109,9 +115,14 @@
 			{
 				if($g_parent != "")
 				{
-					$g_parent = str_replace('AND',"",$g_parent);
-					$parent = substr($parent,4,strlen($parent));
-					$parent_patch = "OR $parent $g_owner $g_score $g_rating";
+					if($g_parent == "any"){
+						$parent_patch = '';
+						$g_parent = '';
+					} else {
+						$g_parent = str_replace('AND',"",$g_parent);
+						$parent = substr($parent,4,strlen($parent));
+						$parent_patch = "OR $parent $g_owner $g_score $g_rating";
+					}
 				}
 				else if($g_owner != "")
 					$g_owner = str_replace('AND',"",$g_owner);

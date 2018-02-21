@@ -36,12 +36,13 @@
 			global $db, $post_table;
 			if(isset($sort) && $sort !="" && $sort){
 				if ($sort == "score"){
-					$sortorder = 'id * score DESC,';
-					$query = "SELECT SQL_NO_CACHE score FROM $post_table WHERE id = $id";
+					$sortorder = 'score DESC,';
+					$query = "SELECT (SELECT SQL_NO_CACHE score FROM $post_table WHERE id = $id) AS score, (SELECT SQL_NO_CACHE COUNT(*) FROM $post_table) AS count";
 					$result = $db->query($query);
 					$row = $result->fetch_assoc();
-					$id *= $row['score'];
-					$sortwhere = '* score';
+					$id += $row['score'] * $row['count'];
+					$sortwhere = '+ score * '.$row['count'];
+					$sortscore = $row['count'];
 					$result->free_result();
 				}
 			} else { 
@@ -72,9 +73,12 @@
 					{
 						$g_parent = str_replace("parent:","",$current);
 						$parent = " AND id='$g_parent'";
-						if(!is_numeric($g_parent))
-							$g_parent = '';
-						else
+						if(!is_numeric($g_parent)){
+							if($g_parent == 'any')
+								$parent = '';
+							else
+								$g_parent = '';
+						} else
 							$g_parent = " AND parent='$g_parent'";
 						$current = '';
 					}
@@ -138,7 +142,10 @@
 				$blacklist = $searchclassfnc->blacklist_fragment();
 				if($g_tags != "")
 				{
-					if($g_parent != "")
+					if($g_parent == "any"){
+						$g_parent = '';
+						$parent_patch = '';
+					} else if($g_parent != "")
 						$parent_patch = "OR (MATCH(tags) AGAINST('$g_tags' IN BOOLEAN MODE)>0.9) $parent $g_owner $g_score $g_rating";
 					else
 						$parent_patch = " AND parent='0'";
@@ -154,9 +161,14 @@
 				{
 					if($g_parent != "")
 					{
-						$g_parent = str_replace('AND',"",$g_parent);
-						$parent = substr($parent,4,strlen($parent));
-						$parent_patch = "OR $parent $g_owner $g_score $g_rating";
+						if($g_parent == "any"){
+							$g_parent = '';
+							$parent_patch = '';
+						} else {
+							$g_parent = str_replace('AND',"",$g_parent);
+							$parent = substr($parent,4,strlen($parent));
+							$parent_patch = "OR $parent $g_owner $g_score $g_rating";
+						}
 					}
 					else if($g_owner != "")
 						$g_owner = str_replace('AND',"",$g_owner);
@@ -189,8 +201,7 @@
 			$prev_next[] = $row['id'];
 			if(isset($sort) && $sort !="" && $sort){
 				if ($sort == "score"){
-					$sortorder = 'id * score ASC,';
-					$sortwhere = '* score';
+					$sortorder = 'score ASC,';
 			}}
 			if($tagged){
 				if($g_tags != "")

@@ -26,11 +26,11 @@
 		$sort = "score";
 	else
 		$sort = "";
-	$prev_next = $post->prev_next($id, false , $sort);
+	$prev_next = $post->prev_next($id, false);
 	if(isset($_GET["tags"]) && $_GET["tags"] != "all"){
 		$prev_next_tagged = $post->prev_next($id, str_replace("%",'',str_replace("'","&#039;",str_replace('"','&quot;',$_GET['tags']))), $sort);
 	} else
-		$prev_next_tagged = $prev_next;
+		$prev_next_tagged = $post->prev_next($id, false, $sort);
 	//global $special_tags;
 	
 	if(!is_dir("$main_cache_dir".""."\cache/$id"))
