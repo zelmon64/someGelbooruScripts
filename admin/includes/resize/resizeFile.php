@@ -1,4 +1,7 @@
 <?php
+	require "../header.php";
+	if(!defined('_IN_ADMIN_HEADER_'))
+		die;
 
 /*
 ****************** JPIE *******************

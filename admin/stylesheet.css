@@ -31,3 +31,13 @@
 	position:relative;
 	float:right;
 }
+
+/*Open window*/
+
+#form_file2upload {
+	margin-top:1em;
+}
+
+#form_folder2create {
+	margin-top:1em;
+}

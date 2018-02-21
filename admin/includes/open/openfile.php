@@ -1,4 +1,7 @@
 <?php
+	require "../header.php";
+	if(!defined('_IN_ADMIN_HEADER_'))
+		die;
 	include('../configure.php');
 	include('functions.php');
 session_start();
@@ -45,16 +48,21 @@ $overwrite = 1;
 
 // Remove directory
 if (isset($_GET['delDir'])) {
-	deleteDir($_SERVER["DOCUMENT_ROOT"] . $dirpath . "/" .$_GET['delDir']);
+	if (deleteDir($dirpath . "/" . $_GET['delDir'])) {
+        echo "Deleted folder " . $_GET['delDir'];
+	} else { echo "Failed to delet folder " . $dirpath . "/" . $_GET['delDir']; }
 }
 
 if (isset($_GET['delFile'])) {
-	unlink($_SERVER["DOCUMENT_ROOT"] .$dirpath."/".$_GET['delFile']);
+	if ( unlink($dirpath . "/" . $_GET['delFile']) ) {
+        echo "Deleted ".$_GET['delFile'];
+	} else { echo "Failed to delete " . $dirpath . "/" . $_GET['delFile']; }
 }
 
 if (isset($_POST['newFolderField'])) {
- 	echo $dirpath . $_POST['newFolderField'];
-	mkdir($dirpath ."/". $_POST['newFolderField'] , 0777);
+	if (mkdir($dirpath ."/". $_POST['newFolderField'] , 0777)) {
+ 	    echo "Created folder " . $_POST['newFolderField'];
+ 	} else { echo "Failed to created folder " . $dirpath . "/" . $_POST['newFolderField']; }
 }
 
 if($_FILES['file']) {
@@ -99,7 +107,7 @@ while (false !== ($file = readdir($dh))) {
 <html>
 <head>
 <title>Image Browser</title>
-<link rel="stylesheet" type="text/css" href="stylesheet.css">
+<link rel="stylesheet" type="text/css" href="../../stylesheet.css">
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 <style>
 body {
@@ -107,15 +115,16 @@ body {
 	font-size:10pt;
 }
 </style>
+<script type="text/javascript" src="open.js"></script>
 </head>
 <body>
 <div id="container">
-<div id="fileList" style="overflow:auto;height:300px">
+  <div id="fileList" style="overflow:auto;height:300px">
     <?php
 	//Show all directories
 
 	echo "<table id='fileListTable'>";
-	echo "<tr><th>Filename</th><th>Size</th></tr>";
+	echo "<tr><th onclick=\"sortTable(0)\">Filename</th><th onclick=\"sortTable(1)\">Size</th></tr>";
 
 	for ($i=0;$i<count($dirs);$i++) {
 	 	echo "<tr><td colspan=\"2\">";
@@ -136,18 +145,18 @@ body {
 
 		if ($dirOk) { //El directorio es un directorio válido (no está en la lista de prohibidos)
 			echo "<a href=\"".$_SERVER['PHP_SELF']."?path=".$thisDir."\">";
-			echo "<img src=\"folder.gif\" border=\"0\">";
-			echo "</a>";
+			echo "<img src=\"folder.gif\" border=\"0\"> ";
 
 			if (strlen($dirs[$i])<25) {
 			 	echo $dirs[$i];
 			} else {
 				echo substr($dirs[$i], 0, 22) . "...";
 			}
-			echo "\n";
-			//if ($dirs[$i]!="..") {
-			//	echo "<div><a href=\"javascript:eliminaDir('". urlencode($dirs[$i] ) ."')\" style=\"width:50px;\"><img src=\"fileManagerImages/delete.gif\" border=\"0\" alt=\"Eliminar la carpeta\"></a></div>";
-			//}
+			echo "</a>";
+			echo "</td><td align=\"right\">";
+			if ($dirs[$i]!="..") {
+				echo "<div><a href=\"openfile.php?delDir=". urlencode($dirs[$i] ) ."\" onclick=\"return confirm('Are you sure?')\"> <img src=\"delete.gif\" border=\"0\" alt=\"Eliminar la carpeta\"></a></div>";
+			}
 
 		}
 		echo "</td></tr>";
@@ -156,26 +165,31 @@ body {
 	for ($i=0;$i<count($files);$i++) {
 			echo "<tr><td>";
 			echo "<img src=\"file.gif\" border=\"0\">";
-			if (strlen($files[$i])<26) {
+			if (strlen($files[$i])<56) {
 			 	echo "<a href=\"openfile.php?open=" .substr($_SESSION['path'], 1)."/". $files[$i] ."\">". $files[$i] ."</a>";
 			} else {
-				echo "<a href=\"openfile.php?open=" .substr($_SESSION['path'], 1)."/". $files[$i] ."\">". substr($files[$i], 0, 22) . "...</a>";
+				echo "<a href=\"openfile.php?open=" .substr($_SESSION['path'], 1)."/". $files[$i] ."\">". substr($files[$i], 0, 52) . "...</a>";
 			}
-			echo "</td><td>";
+			echo "</td><td align=\"right\">";
 			$fileinfo = stat($dirpath.'/'.$files[$i]);
-			echo 	round( ( $fileinfo[ "size" ] / 1024 ), 1 )  . "kb";
+			echo number_format(( $fileinfo[ "size" ] / 1024 ), 2, '.', ',') . "kb";
+			echo "</td><td align=\"right\">";
+			if ($files[$i] != null) {
+			    echo "<a href=\"openfile.php?delFile=". $files[$i] ."\" onclick=\"return confirm('Are you sure?')\"><img src=\"delete.gif\" border=\"0\" alt=\"Delete\"></a>";
+			}
 			echo "</td></tr>";
 	}
 	echo "</table>";
 
 	closedir($dh);
 	?>
-	</div>
-	<!--The upload capability poses a security risk especially when the IMAGE_PATH is set to the ROOT_PATH-->
-	<!--form name="form_file2upload" action="openfile.php" method="POST" enctype="multipart/form-data">
-		<input type="file" name="file"><input type="submit" value="Upload File">
-	</form-->
   </div>
-
+	<form name="form_file2upload" id="form_file2upload" action="openfile.php" method="POST" enctype="multipart/form-data">
+		<input type="file" name="file"><input type="submit" value="Upload File">
+	</form>
+	<form name="form_folder2create" id="form_folder2create" action="openfile.php" method="POST" enctype="multipart/form-data">
+		<input type="submit" value="Create folder:"><input type="text" name="newFolderField" value="New Folder">
+	</form>
+</div>
 </body>
 </html>

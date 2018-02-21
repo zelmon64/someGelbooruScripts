@@ -26,6 +26,8 @@
 			require "tag_category_edit.php";
 	else if($_GET['page'] == "jpie")
 			require "jpie.php";
+	else if($_GET['page'] == "jpie_open")
+			require "includes/open/openfile.php";
 
 ?>
 <br></body></html>
